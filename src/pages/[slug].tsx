@@ -21,8 +21,8 @@ export const ProfileFeed = (props: {userId: string} ) => {
 
 
 const ProfilePage: NextPage<{ username: string}> = ({ username }) => {
-    const { data, isLoading } = api.profile.getUserByUsername.useQuery({
-        username: 'lmraza98'
+    const { data } = api.profile.getUserByUsername.useQuery({
+        username: username
     })
 
     if (!data) return <div>404</div>
@@ -78,7 +78,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
         }
       }
 }
-export const getStaticPaths = async () => {
+export const getStaticPaths = () => {
     return {
         paths: [], fallback: 'blocking',
     }
