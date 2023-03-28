@@ -3,13 +3,10 @@ import { type NextPage } from "next";
 import { PostView } from "~/components/postview";
 import { api } from "~/utils/api";
 
-
-
 import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { PageLayout } from "~/components/layout";
-
 
 const CreatePostWizard = () => {
   const { user } = useUser();
@@ -110,8 +107,8 @@ const Home: NextPage = () => {
               </div>
             )}
             {isSignedIn && <CreatePostWizard/>}
-          <Feed/>
         </div>
+        <Feed/>
       </PageLayout>
   );
 };
