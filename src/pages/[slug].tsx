@@ -5,11 +5,11 @@ import { api } from "~/utils/api"
 import { PageLayout } from "~/components/layout"
 import { PostView } from "~/components/postview"
 import { LoadingPage } from "~/components/loading"
-
+import { generateSSGHelper } from '~/server/helpers/ssgHelper'
 
 export const ProfileFeed = (props: {userId: string} ) => {
 
-    const { data, isLoading } = api.posts.getPostsByUserId.useQuery({userId: props.userId})
+    const { data, isLoading } = api.posts.getPostsByUserId.useQuery({ userId: props.userId })
 
     if(isLoading) return <LoadingPage />
 
@@ -51,32 +51,26 @@ const ProfilePage: NextPage<{ username: string}> = ({ username }) => {
     )
 }
 
-import { createProxySSGHelpers } from '@trpc/react-query/ssg';
-import { appRouter } from '~/server/api/root'
-import { prisma } from '~/server/db'
-import superjson from 'superjson'
+
 
 export const getStaticProps: GetStaticProps = async (context) => {
-    const ssg = createProxySSGHelpers({
-        router: appRouter,
-        ctx: { prisma, userId: null },
-        transformer: superjson, // optional - adds superjson serialization
-      });
+    const ssg = generateSSGHelper()
 
-      const slug = context.params?.slug
 
-      if (typeof slug !== "string") throw new Error("no slug")
+    const slug = context.params?.slug
 
-      const username = slug.replace("@", "")
+    if (typeof slug !== "string") throw new Error("no slug")
 
-      await ssg.profile.getUserByUsername.prefetch({ username })
+    const username = slug.replace("@", "")
 
-      return {
-        props: {
-            trpcState: ssg.dehydrate(),
-            username,
-        }
-      }
+    await ssg.profile.getUserByUsername.prefetch({ username })
+
+    return {
+    props: {
+        trpcState: ssg.dehydrate(),
+        username,
+    }
+    }
 }
 export const getStaticPaths = () => {
     return {
