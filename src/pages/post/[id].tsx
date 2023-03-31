@@ -7,6 +7,7 @@ import { generateSSGHelper } from '~/server/helpers/ssgHelper'
 import { GetStaticProps } from "next"
 
 const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
+    
     const { data } = api.posts.getById.useQuery({
         id 
     })
@@ -23,6 +24,7 @@ const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
         </>
     )
 }
+
 export const getStaticProps: GetStaticProps = async (context) => {
     const ssg = generateSSGHelper()
 
@@ -39,9 +41,11 @@ export const getStaticProps: GetStaticProps = async (context) => {
         }
     }
 }
+
 export const getStaticPaths = () => {
     return {
         paths: [], fallback: 'blocking',
     }
 }
+
 export default SinglePostPage
