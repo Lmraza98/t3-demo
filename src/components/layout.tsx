@@ -1,57 +1,43 @@
+import React from "react";
 import type { PropsWithChildren } from "react";
-import { useRef, useEffect } from "react";
-import { useGlobal } from "~/contexts/global";
-
-export const PageLayout = (props: PropsWithChildren) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const { scroll, setScroll } = useGlobal();
-  console.log("SCROLL: ", scroll);
-  let timer = null;
-
-  const handleScroll = () => {
-    if (scrollRef.current && setScroll) {
-      setScroll(true);
-
-      // Clear any existing timer
-      if (timer) {
-        clearTimeout(timer);
-      }
-
-      // Set a new timer to update the scroll state to false after 100ms
-      timer = setTimeout(() => {
-        setScroll(false);
-      }, 10);
-    }
-  };
-  
-
-  useEffect(() => {
-    const element = scrollRef.current;
-
-    // Attach the event listeners
-    if (element) {
-      element.addEventListener("scroll", handleScroll);
-    }
-
-    // Cleanup function to remove the event listener
-    return () => {
-      if (element) {
-        element.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [scrollRef, setScroll, scroll]);
-
-  
-
+import { useUser, SignInButton } from "@clerk/nextjs";
+const Banner = () => {
   return (
-    <main className="flex h-screen justify-center">
+    <div className="fixed bottom-0 w-full py-2 bg-blue-500 text-white shadow-md">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-[minmax(0,1fr),minmax(0,2fr),minmax(0,1fr)] items-center h-full w-full">
+          <div></div>
+          <div className="text-left">
+            <p className="text-sm">Your message goes here</p>
+          </div>
+          <div className="text-right">
+            <SignInButton className="px-4 py-1 bg-blue-700 rounded-md mr-2 hover:bg-blue-800"/>
+
+            {/* <button >
+              Sign In
+            </button> */}
+            <button className="px-4 py-1 bg-blue-700 rounded-md hover:bg-blue-800">
+              Sign Up
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+export const PageLayout = (props: PropsWithChildren) => {
+  
+  const { isLoaded: userLoaded, isSignedIn } = useUser()
+  return (
+    <main className="flex h-full w-full justify-center">
+      {
+        !isSignedIn && <Banner />
+      }
       <div
-        onScroll={(event)=> {setScroll(true)}}
-        className="h-full w-full border-x border-slate-400 md:max-w-2xl overflow-y-scroll"
-        style={{ height: "90vh" }}
+        className=" flex flex-row h-full justify-start w-full"
       >
         {props.children}
-      </div>
+      </div>  
     </main>
   );
 };

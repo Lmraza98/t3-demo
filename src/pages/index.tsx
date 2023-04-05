@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { SignInButton, useUser } from "@clerk/nextjs";
+import { Nav } from '~/components/nav';
+import { useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
 import { PostView } from "~/components/postview";
 import { api } from "~/utils/api";
@@ -10,6 +11,8 @@ import { toast } from "react-hot-toast";
 import { PageLayout } from "~/components/layout";
 import { AiOutlineSmile } from 'react-icons/ai';
 import { useGlobal } from "~/contexts/global"
+import { Sidebar } from '~/components/sidebar';
+
 const CreatePostWizard = () => {
   const { user } = useUser();
   const [ input, setInput ] = useState<string>('')
@@ -61,11 +64,10 @@ const CreatePostWizard = () => {
   }, [emojiPickerRef]);
   
   if(!user) return null
-  
 
   return (
     <div className="flex flex-col gap-3 w-full h-full">
-      <div className="relative flex flex-col h-28">
+      <div className="relative flex flex-col">
         {
           showEmojiPicker && (
             <div ref={emojiPickerRef} className="absolute transform translate-y-28" >
@@ -76,14 +78,12 @@ const CreatePostWizard = () => {
             </div>
           )
         }
-        <h1 className="text-lg">HOME</h1>
-        <div className="flex flex-row gap-3 w-full p-4">
+        <div className="flex flex-row gap-3 w-full p-4 border-b border-opacity-20 border-white">
           <img 
             src={user.profileImageUrl} 
             alt="Profile Image"
-            className="h-14 w-14 rounded-full gap-3"
+            className="h-12 w-12 rounded-full gap-3"
           />
-          
           <div className="flex flex-col justify-center align-middle">
             <AiOutlineSmile onClick={()=> {
                 setShowEmojiPicker(!showEmojiPicker)
@@ -109,7 +109,6 @@ const CreatePostWizard = () => {
           </div>
           <div id="menu-button" aria-expanded="true" aria-haspopup="true" aria-controls="menu">
             <div className="flex flex-row gap-3 w-full pl-20">
-            
             {
               input !=="" && !isPosting && (
                 <button 
@@ -121,8 +120,6 @@ const CreatePostWizard = () => {
               )
             }
             </div>
-            
-           
           </div>
         </div>
         
@@ -147,7 +144,7 @@ const Feed = () => {
   if(!data) return <div>Something went wrong...</div>
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full">
       {data.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id} />
       ))}
@@ -155,26 +152,88 @@ const Feed = () => {
   )
 }
 
-const Home: NextPage = () => {
-  const { isLoaded: userLoaded, isSignedIn } = useUser()
+const useScroll = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scroll, setScroll } = useGlobal();
+  console.log("SCROLL: ", scroll);
+  let timer = null;
 
-  api.posts.getAll.useQuery()
+  const handleScroll = () => {
+    if (scrollRef.current && setScroll) {
+      setScroll(true);
 
-  if (!userLoaded) return <div/>
+      // Clear any existing timer
+      if (timer) {
+        clearTimeout(timer);
+      }
+
+      // Set a new timer to update the scroll state to false after 100ms
+      timer = setTimeout(() => {
+        setScroll(false);
+      }, 10);
+    }
+  };
   
+  useEffect(() => {
+    const element = scrollRef.current;
+
+    // Attach the event listeners
+    if (element) {
+      element.addEventListener("scroll", handleScroll);
+    }
+
+    // Cleanup function to remove the event listener
+    return () => {
+      if (element) {
+        element.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [scrollRef, setScroll, scroll]);
+
+  return { scrollRef, global: [ scroll, setScroll]  };
+}
+const Home: NextPage = () => {
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
+  api.posts.getAll.useQuery();
+
+  if (!userLoaded) return <div />;
+
   return (
-      <PageLayout>
-        <div className="flex flex-col border-b border-slate-400">
-            {!isSignedIn && (
-              <div className="flex justify-center">
-                <SignInButton/>
+    <PageLayout>
+      <Nav />
+      <div className="grid grid-cols-2 gap-3 w-full">
+        {/* Main content */}
+        <div className="flex flex-col overflow-auto justify-start max-h-screen">
+          <div className="fixed w-2/5 top-0 bg-black bg-opacity-70 text-white shadow-md z-10 border-b border-opacity-20 border-white flex flex-col justify-between backdrop-blur-md">
+            <div className="flex flex-col justify-center text-lg gap-3 h-12 p-4">
+              <h1 className="">HOME</h1>
+            </div>
+            <div className="container mx-auto">
+              <div className="flex justify-end items-end h-12">
+                <button className="transition duration-600 w-1/2 h-full text-sm font-semibold bg-gray-400 bg-opacity-0 hover:bg-opacity-10">
+                  General
+                </button>
+                <button className="transition duration-600 w-1/2 h-full text-sm font-semibold bg-gray-400 bg-opacity-0 hover:bg-opacity-10">
+                  Subscribed
+                </button>
               </div>
-            )}
-            {isSignedIn && <CreatePostWizard/>}
+            </div>
+          </div>
+          <div className="pt-24 sticky">
+            <CreatePostWizard />
+          </div>
+          <div className="sticky scrollbar overflow-y-auto">
+            <Feed />
+          </div>
         </div>
-        <Feed/>
-      </PageLayout>
+        {/* Sidebar */}
+        <div className="sticky">
+          <Sidebar />
+        </div>
+      </div>
+    </PageLayout>
   );
 };
+
 
 export default Home;

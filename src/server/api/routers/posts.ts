@@ -108,5 +108,37 @@ export const postsRouter = createTRPCRouter({
             }
         })
         return post
-    })
+    }),
+    like: privateProcedure.input(z.object({
+        postId: z.string(),
+      })).mutation(async ({ ctx, input }) => {
+            const userId = ctx.userId;
+
+            // Check if the user has already liked the post
+            const existingLike = await ctx.prisma.like.findUnique({
+            where: {
+                postId_userId: {
+                postId: input.postId,
+                userId: userId,
+                },
+            },
+            });
+
+            if (existingLike) {
+            throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "You have already liked this post.",
+            });
+            }
+
+            // Create a new like
+            const like = await ctx.prisma.like.create({
+            data: {
+                postId: input.postId,
+                userId: userId,
+            },
+            });
+
+            return like;
+        }),
 })

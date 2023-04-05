@@ -15,13 +15,12 @@ const GlobalContext = createContext<GlobalContextData>({
   theme: 'light',
   setTheme: () => null,
   scroll: false,
-  setScroll: () => {}
+  setScroll: () => null
 });
 
 export const GlobalProvider: React.FC = ({ children }) => {
   const [ theme, setTheme ] = useState<Theme>('light')
   const [ scroll, setScroll ] = useState<Scroll>(false)
-  console.log(scroll)
 
   useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
