@@ -10,12 +10,12 @@ const LogoutMenu: React.FC = () => {
 
   const toggleMenu = () => {
     setMenuVisible(!menuVisible);
-  };
+  }
 
   return (
-    <div className="relative">
+    <div className="relative ">
       <button
-        className="focus:outline-none"
+        className="focus:outline-none "
         onClick={toggleMenu}
         aria-haspopup="true"
         aria-expanded={menuVisible}
@@ -94,7 +94,7 @@ export const Nav: React.FC = () => {
   }
   
   return (
-        <div className="flex flex-col w-1/3 h-screen border-r border-opacity-20 border-white">
+        <div className="flex flex-col w-1/3 border-r border-opacity-20 border-white">
             <div className='fixed top-0'>
         {/* Twitter logo */}
         <div className="flex justify-end h-16 px-4">

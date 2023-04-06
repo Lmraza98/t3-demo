@@ -26,3 +26,12 @@ body {
         scrollbar-width: none; /* Firefox */
     }
 }
+@layer components {
+    .scrollStop {
+      @apply sticky top-0;
+    }
+    .scrollStop::after {
+      content: '';
+      display: block;
+    }
+  }

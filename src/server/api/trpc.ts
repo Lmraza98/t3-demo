@@ -99,3 +99,7 @@ const enforceUserIsAuthed = t.middleware(async ({ctx, next}) => {
   })
 })
 export const privateProcedure = t.procedure.use(enforceUserIsAuthed)
+
+import type { inferAsyncReturnType } from '@trpc/server';
+
+export type Context = inferAsyncReturnType<typeof createTRPCContext>;
